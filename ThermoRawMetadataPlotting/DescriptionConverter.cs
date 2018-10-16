@@ -27,7 +27,7 @@ namespace ThermoRawMetadataPlotting
             if (value.GetType().IsEnum)
             {
                 inherit = false;
-                flags = BindingFlags.Default;
+                flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
             }
 
             DescriptionAttribute desc = null;
