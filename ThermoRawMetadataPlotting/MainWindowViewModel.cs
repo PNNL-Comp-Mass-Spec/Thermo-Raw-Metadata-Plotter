@@ -3,15 +3,17 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Media;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using ReactiveUI;
+using ReactiveUI.Legacy;
 using ThermoRawMetadataReader;
 
 namespace ThermoRawMetadataPlotting
@@ -26,6 +28,12 @@ namespace ThermoRawMetadataPlotting
         private Axis yAxis;
         private Axis xAxis;
         private ScatterSeries dataSeries;
+        private readonly DescriptionConverter descConverter = new DescriptionConverter();
+        private string status;
+        private readonly Timer statusResetTimer;
+        private readonly IReadOnlyReactiveList<MsLevelOptions> allMsLevelOptions;
+        private IReadOnlyReactiveList<MsLevelOptions> msLevelOptionsList;
+        private MsLevelOptions selectedMsLevel;
 
         public string RawFilePath
         {
@@ -51,6 +59,28 @@ namespace ThermoRawMetadataPlotting
             private set => this.RaiseAndSetIfChanged(ref dataPlot, value);
         }
 
+        public string Status
+        {
+            get => status;
+            set
+            {
+                this.RaiseAndSetIfChanged(ref status, value);
+                statusResetTimer.Change(TimeSpan.FromSeconds(30), Timeout.InfiniteTimeSpan);
+            }
+        }
+
+        public MsLevelOptions SelectedMSLevel
+        {
+            get => selectedMsLevel;
+            set => this.RaiseAndSetIfChanged(ref selectedMsLevel, value);
+        }
+
+        public IReadOnlyReactiveList<MsLevelOptions> MsLevelOptionsList
+        {
+            get => msLevelOptionsList;
+            set => this.RaiseAndSetIfChanged(ref msLevelOptionsList, value);
+        }
+
         public List<PropertyInfo> ScanMetadataProperties { get; }
 
         public ReactiveCommand<Unit, Unit> OpenRawFileCommand { get; }
@@ -64,6 +94,8 @@ namespace ThermoRawMetadataPlotting
         public MainWindowViewModel(string rawFilePath)
         {
             RawFilePath = rawFilePath;
+            allMsLevelOptions = new ReactiveList<MsLevelOptions>(Enum.GetValues(typeof(MsLevelOptions)).Cast<MsLevelOptions>().OrderBy(x => (int)x));
+            MsLevelOptionsList = allMsLevelOptions;
 
             OpenRawFileCommand = ReactiveCommand.Create(OpenRawFile);
             BrowseForRawFileCommand = ReactiveCommand.Create(BrowseForRawFile);
@@ -73,14 +105,23 @@ namespace ThermoRawMetadataPlotting
             XAxisProperty = ScanMetadataProperties.First(x => x.Name.Equals(nameof(ScanMetadata.ScanNumber)));
             YAxisProperty = ScanMetadataProperties.First(x => x.Name.Equals(nameof(ScanMetadata.IonInjectionTime)));
 
+            SelectedMSLevel = MsLevelOptions.All;
+
             SetupPlot();
+
+            statusResetTimer = new Timer(StatusReset, this, Timeout.Infinite, Timeout.Infinite);
 
             if (!string.IsNullOrWhiteSpace(RawFilePath))
             {
                 OpenRawFile();
             }
 
-            this.WhenAnyValue(x => x.XAxisProperty, x => x.YAxisProperty).Throttle(TimeSpan.FromMilliseconds(200)).Subscribe(x => ChangePlot());
+            this.WhenAnyValue(x => x.XAxisProperty, x => x.YAxisProperty, x => x.SelectedMSLevel).Throttle(TimeSpan.FromMilliseconds(200)).Subscribe(x => ChangePlot());
+        }
+
+        private void StatusReset(object sender)
+        {
+            RxApp.MainThreadScheduler.Schedule(() => Status = "");
         }
 
         private void SwapAxis()
@@ -97,19 +138,29 @@ namespace ThermoRawMetadataPlotting
         {
             if (string.IsNullOrWhiteSpace(RawFilePath) || !File.Exists(RawFilePath))
             {
-                //statusUpdate($"Error: file \"{RawFilePath}\" does not exist.");
+                Status = $"Error: file \"{RawFilePath}\" does not exist.";
                 return;
             }
 
             try
             {
+                Status = $"Loading data...";
                 scanMetadata = DataLoader.GetMetadata(RawFilePath);
+                Status = $"Data loaded.";
             }
             catch (Exception e)
             {
-                //statusUpdate($"Error: failed to load file. {e.Message}");
+                Status = $"Error: failed to load file. {e.Message}";
                 return;
             }
+
+            var msLevels = scanMetadata.Select(x => x.MSLevel).Distinct().ToList();
+            MsLevelOptionsList = allMsLevelOptions.CreateDerivedCollection(x => x,
+                x => msLevels.Contains((int) x) ||
+                     (x == MsLevelOptions.All && msLevels.Any(y => y == 1) && msLevels.Any(y => y > 1)) ||
+                     (x == MsLevelOptions.MSn && msLevels.Any(y => y > 1)));
+
+            SelectedMSLevel = msLevelOptionsList.Min();
 
             ChangePlot();
         }
@@ -147,13 +198,11 @@ namespace ThermoRawMetadataPlotting
             return typeof(ScanMetadata).GetProperties();
         }
 
-        private DescriptionConverter descConverter = new DescriptionConverter();
-
         private void ChangePlot()
         {
             xAxis.Title = descConverter.Convert(xAxisProperty);
             yAxis.Title = descConverter.Convert(yAxisProperty);
-            dataSeries.ItemsSource = scanMetadata;
+            dataSeries.ItemsSource = scanMetadata.Where(x => SelectedMSLevel == MsLevelOptions.All || SelectedMSLevel == MsLevelOptions.MSn && x.MSLevel > 1 || x.MSLevel == (int)SelectedMSLevel);
 
             dataSeries.Mapping = new Func<object, ScatterPoint>(x =>
             {

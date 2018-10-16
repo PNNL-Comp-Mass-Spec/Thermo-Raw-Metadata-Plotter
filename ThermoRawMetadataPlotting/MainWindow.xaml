@@ -19,6 +19,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -47,6 +48,13 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <oxy:PlotView Grid.Row="1" Grid.Column="1" Grid.RowSpan="5" Model="{Binding DataPlot}" />
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
+            <TextBlock Margin="3" VerticalAlignment="Center" Text="MS Level:" />
+            <ComboBox Margin="3" MinWidth="100" ItemsSource="{Binding MsLevelOptionsList}" SelectedItem="{Binding SelectedMSLevel}" />
+        </StackPanel>
+        <oxy:PlotView Grid.Row="2" Grid.Column="1" Grid.RowSpan="4" Model="{Binding DataPlot}" />
+        <StatusBar Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+            <StatusBarItem Content="{Binding Status}" />
+        </StatusBar>
     </Grid>
 </Window>
