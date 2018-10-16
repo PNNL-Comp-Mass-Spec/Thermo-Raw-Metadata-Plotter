@@ -65,18 +65,46 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DataLoader.cs" />
+    <Compile Include="DescriptionConverter.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MainWindowViewModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MSFileReaderMetadata\MSFileReaderMetadata.csproj">
+      <Project>{aba8ad15-973d-4917-b8d4-f9d4a5f35147}</Project>
+      <Name>MSFileReaderMetadata</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RawReaderMetadata\RawReaderMetadata.csproj">
+      <Project>{3ebe4dcc-b0bd-4c6d-899d-b3c1af03a727}</Project>
+      <Name>RawReaderMetadata</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThermoRawMetadataReader\ThermoRawMetadataReader.csproj">
+      <Project>{1a5a293b-8872-4986-a995-7b5592c78398}</Project>
+      <Name>ThermoRawMetadataReader</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="OxyPlot.Wpf">
+      <Version>1.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="PRISM-Library">
+      <Version>2.5.3</Version>
+    </PackageReference>
+    <PackageReference Include="ReactiveUI.WPF">
+      <Version>9.0.1</Version>
+    </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
