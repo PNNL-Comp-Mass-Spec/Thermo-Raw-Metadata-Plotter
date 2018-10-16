@@ -7,7 +7,7 @@
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance {x:Type local:MainWindowViewModel}, IsDesignTimeCreatable=True}"
-        Title="Scan Info" Height="450" Width="800">
+        Title="Scan Info" Height="600" Width="1024">
     <Window.Resources>
         <local:DescriptionConverter x:Key="DescConv" />
     </Window.Resources>
@@ -57,6 +57,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            <Button Margin="3" Content="Zoom Full" Command="{Binding ZoomFullCommand}"></Button>
         </StackPanel>
         <oxy:PlotView Grid.Row="2" Grid.Column="1" Grid.RowSpan="4" Model="{Binding DataPlot}" />
         <StatusBar Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">

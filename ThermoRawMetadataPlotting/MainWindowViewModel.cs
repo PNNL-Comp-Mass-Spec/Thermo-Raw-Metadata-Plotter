@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Media;
+using DynamicData;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -25,8 +26,9 @@ namespace ThermoRawMetadataPlotting
         private PropertyInfo xAxisProperty;
         private PlotModel dataPlot;
         private List<ScanMetadata> scanMetadata = new List<ScanMetadata>();
-        private Axis yAxis;
-        private Axis xAxis;
+        private LinearAxis yAxis;
+        private LinearAxis xAxis;
+        private LinearColorAxis colorAxis;
         private ScatterSeries dataSeries;
         private readonly DescriptionConverter descConverter = new DescriptionConverter();
         private string status;
@@ -86,6 +88,7 @@ namespace ThermoRawMetadataPlotting
         public ReactiveCommand<Unit, Unit> OpenRawFileCommand { get; }
         public ReactiveCommand<Unit, Unit> BrowseForRawFileCommand { get; }
         public ReactiveCommand<Unit, Unit> SwapAxisCommand { get; }
+        public ReactiveCommand<Unit, Unit> ZoomFullCommand { get; }
 
         public MainWindowViewModel() : this("")
         {
@@ -100,6 +103,7 @@ namespace ThermoRawMetadataPlotting
             OpenRawFileCommand = ReactiveCommand.Create(OpenRawFile);
             BrowseForRawFileCommand = ReactiveCommand.Create(BrowseForRawFile);
             SwapAxisCommand = ReactiveCommand.Create(SwapAxis);
+            ZoomFullCommand = ReactiveCommand.Create(ZoomFull);
 
             ScanMetadataProperties = new List<PropertyInfo>(GetProperties());
             XAxisProperty = ScanMetadataProperties.First(x => x.Name.Equals(nameof(ScanMetadata.ScanNumber)));
@@ -162,6 +166,7 @@ namespace ThermoRawMetadataPlotting
 
             SelectedMSLevel = msLevelOptionsList.Min();
 
+            SetColorAxis();
             ChangePlot();
         }
 
@@ -204,12 +209,81 @@ namespace ThermoRawMetadataPlotting
             yAxis.Title = descConverter.Convert(yAxisProperty);
             dataSeries.ItemsSource = scanMetadata.Where(x => SelectedMSLevel == MsLevelOptions.All || SelectedMSLevel == MsLevelOptions.MSn && x.MSLevel > 1 || x.MSLevel == (int)SelectedMSLevel);
 
+            var data = scanMetadata.Where(x =>
+                    SelectedMSLevel == MsLevelOptions.All || SelectedMSLevel == MsLevelOptions.MSn && x.MSLevel > 1 ||
+                    x.MSLevel == (int) SelectedMSLevel)
+                .ToList();
+
+            GetMinMax(data, x => Convert.ToDouble(xAxisProperty.GetValue(x)), out var xMin, out var xMax);
+            GetMinMax(data, x => Convert.ToDouble(yAxisProperty.GetValue(x)), out var yMin, out var yMax);
+
+            xAxis.AbsoluteMinimum = xMin;
+            xAxis.AbsoluteMaximum = xMax;
+            yAxis.AbsoluteMinimum = yMin;
+            yAxis.AbsoluteMaximum = yMax;
+
             dataSeries.Mapping = new Func<object, ScatterPoint>(x =>
             {
-                return new ScatterPoint(Convert.ToDouble(xAxisProperty.GetValue(x)), Convert.ToDouble(yAxisProperty.GetValue(x)));
+                return new ScatterPoint(Convert.ToDouble(xAxisProperty.GetValue(x)), Convert.ToDouble(yAxisProperty.GetValue(x)), value: ((ScanMetadata)x).ScanNumber);
             });
 
+            DataPlot.ResetAllAxes();
             DataPlot.InvalidatePlot(true);
+        }
+
+        private void ZoomFull()
+        {
+            DataPlot.ResetAllAxes();
+            DataPlot.InvalidatePlot(false);
+        }
+
+        private void SetColorAxis()
+        {
+            var max = 100;
+            if (scanMetadata.Count > 0)
+            {
+                max = scanMetadata.Max(x => x.ScanNumber);
+            }
+
+            colorAxis.Minimum = 1;
+            colorAxis.Maximum = max;
+
+            colorAxis.Palette.Colors.Clear();
+            ////for (int i = 0; i < 256; i++)
+            //for (int i = 120; i < 136; i++)
+            //{
+            //    colorAxis.Palette.Colors.Add(OxyColor.FromAColor((byte)i, OxyColors.DodgerBlue));
+            //}
+            for (var i = 0; i < max + 1; i++)
+            {
+                colorAxis.Palette.Colors.Add(OxyColor.FromAColor((byte)(i % 60 + 98), OxyColors.DodgerBlue));
+            }
+        }
+
+        private void GetMinMax(List<ScanMetadata> data, Func<ScanMetadata, double> selector, out double min, out double max)
+        {
+            if (data.Count == 0)
+            {
+                min = 0;
+                max = 100;
+                return;
+            }
+
+            var minVal = data.Min(selector);
+            var maxVal = data.Max(selector);
+
+            if (minVal.Equals(maxVal))
+            {
+                min = minVal - 0.1;
+                max = maxVal + 0.1;
+            }
+            else
+            {
+                var diff = Math.Abs(maxVal - minVal);
+                var adj = 0.05 * diff;
+                min = minVal - adj;
+                max = maxVal + adj;
+            }
         }
 
         private void SetupPlot()
@@ -228,17 +302,34 @@ namespace ThermoRawMetadataPlotting
                 Title = "Scan Number"
             };
 
+            colorAxis = new LinearColorAxis
+            {
+                Key = "ColorAxis",
+                Position = AxisPosition.None
+            };
+
+            colorAxis.Palette.Colors.Clear();
+            //for (int i = 0; i < 256; i++)
+            for (int i = 120; i < 136; i++)
+            {
+                colorAxis.Palette.Colors.Add(OxyColor.FromAColor((byte)i, OxyColors.DodgerBlue));
+            }
+
             DataPlot.Axes.Add(yAxis);
             DataPlot.Axes.Add(xAxis);
+            DataPlot.Axes.Add(colorAxis);
 
             var color = Colors.DodgerBlue;
+            //var color3 = OxyColor.
             var trackerFormatString = $"Scan: {{{nameof(ScanMetadata.ScanNumber)}}}\nStart time: {{{nameof(ScanMetadata.RetentionTime)}}}\nIon Injection Time (ms): {{{nameof(ScanMetadata.IonInjectionTime)}}}\nBPI: {{{nameof(ScanMetadata.BPI)}}}\nTIC: {{{nameof(ScanMetadata.TIC)}}}\nMS Level: {{{nameof(ScanMetadata.MSLevel)}}}";
-            var pointMapper = new Func<object, ScatterPoint>(x => new ScatterPoint(((ScanMetadata) x).ScanNumber, ((ScanMetadata) x).IonInjectionTime));
+            var pointMapper = new Func<object, ScatterPoint>(x => new ScatterPoint(((ScanMetadata) x).ScanNumber, ((ScanMetadata) x).IonInjectionTime, value: ((ScanMetadata)x).ScanNumber));
 
             dataSeries = new ScatterSeries
             {
                 MarkerType = MarkerType.Circle,
-                MarkerFill = OxyColor.FromAColor(128, OxyColors.DodgerBlue),
+                MarkerSize = 8,
+                MarkerFill = OxyColor.FromAColor(64, OxyColors.DodgerBlue),
+                ColorAxisKey = "ColorAxis",
                 TrackerFormatString = trackerFormatString,
                 Mapping = pointMapper
             };
