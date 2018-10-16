@@ -52,6 +52,8 @@ namespace MSFileReaderMetadata
                 scan.MSLevel = info.MSLevel;
 
                 scan.IonInjectionTime = double.Parse(info.ScanEvents.FirstOrDefault(x => x.Key.StartsWith("Ion Injection Time", StringComparison.OrdinalIgnoreCase)).Value ?? "0");
+
+                data.Add(scan);
             }
 
             return data;

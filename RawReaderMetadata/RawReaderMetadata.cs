@@ -58,6 +58,8 @@ namespace RawReaderMetadata
                         .ToList();
 
                     scan.IonInjectionTime = double.Parse(converted.FirstOrDefault(x => x.Key.StartsWith("Ion Injection Time", StringComparison.OrdinalIgnoreCase)).Value ?? "0");
+
+                    data.Add(scan);
                 }
             }
 

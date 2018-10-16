@@ -11,18 +11,40 @@ namespace ThermoRawMetadataPlotting
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value == null || !value.GetType().IsEnum)
+            return Convert(value);
+        }
+
+        public string Convert(object value)
+        {
+            if (value == null)
             {
                 return string.Empty;
             }
 
-            var attrib = value.GetType().GetField(value.ToString(), BindingFlags.FlattenHierarchy | BindingFlags.Instance)?.GetCustomAttributes(false);
-            var desc = attrib?.OfType<DescriptionAttribute>().FirstOrDefault();
+            var inherit = true;
+            var flags = BindingFlags.FlattenHierarchy | BindingFlags.Instance;
 
-            if (desc == null)
+            if (value.GetType().IsEnum)
             {
-                attrib = value.GetType().GetProperty(value.ToString(), BindingFlags.FlattenHierarchy | BindingFlags.Instance)?.GetCustomAttributes(false);
+                inherit = false;
+                flags = BindingFlags.Default;
+            }
+
+            DescriptionAttribute desc = null;
+            if (value is PropertyInfo pi)
+            {
+                desc = pi.GetCustomAttributes(inherit).OfType<DescriptionAttribute>().FirstOrDefault();
+            }
+            else
+            {
+                var attrib = value.GetType().GetField(value.ToString(), flags)?.GetCustomAttributes(inherit);
                 desc = attrib?.OfType<DescriptionAttribute>().FirstOrDefault();
+
+                if (desc == null)
+                {
+                    attrib = value.GetType().GetProperty(value.ToString(), flags)?.GetCustomAttributes(inherit);
+                    desc = attrib?.OfType<DescriptionAttribute>().FirstOrDefault();
+                }
             }
 
             if (desc == null)

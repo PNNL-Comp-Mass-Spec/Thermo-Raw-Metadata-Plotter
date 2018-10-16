@@ -4,9 +4,49 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ThermoRawMetadataPlotting"
+        xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        d:DataContext="{d:DesignInstance {x:Type local:MainWindowViewModel}, IsDesignTimeCreatable=True}"
+        Title="Scan Info" Height="450" Width="800">
+    <Window.Resources>
+        <local:DescriptionConverter x:Key="DescConv" />
+    </Window.Resources>
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
+            <TextBlock DockPanel.Dock="Left" Margin="3" VerticalAlignment="Center" Text="Raw file:" />
+            <Button DockPanel.Dock="Right" Margin="3" Content="Open" Command="{Binding OpenRawFileCommand}" />
+            <Button DockPanel.Dock="Right" Margin="3" Content="Browse" Command="{Binding BrowseForRawFileCommand}" />
+            <TextBox Margin="3" Text="{Binding RawFilePath}" />
+        </DockPanel>
+        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Y-Axis:" />
+        <ListBox Grid.Row="2" Grid.Column="0" ItemsSource="{Binding ScanMetadataProperties}" SelectedItem="{Binding YAxisProperty}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource DescConv}}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Grid.Row="3" Grid.Column="0" Margin="3" Content="Swap Axis" Command="{Binding SwapAxisCommand}" />
+        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="X-Axis:" />
+        <ListBox Grid.Row="5" Grid.Column="0" ItemsSource="{Binding ScanMetadataProperties}" SelectedItem="{Binding XAxisProperty}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Converter={StaticResource DescConv}}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <oxy:PlotView Grid.Row="1" Grid.Column="1" Grid.RowSpan="5" Model="{Binding DataPlot}" />
     </Grid>
 </Window>

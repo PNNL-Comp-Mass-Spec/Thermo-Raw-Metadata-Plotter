@@ -13,5 +13,12 @@ namespace ThermoRawMetadataPlotting
     /// </summary>
     public partial class App : Application
     {
+        private void App_OnStartup(object sender, StartupEventArgs e)
+        {
+            var mainVm = new MainWindowViewModel();
+            var mainWindow = new MainWindow() {DataContext = mainVm};
+            MainWindow = mainWindow;
+            mainWindow.Show();
+        }
     }
 }
