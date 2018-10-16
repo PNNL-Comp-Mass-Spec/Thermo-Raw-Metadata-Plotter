@@ -8,13 +8,11 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Media;
-using DynamicData;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
 using ReactiveUI;
-using ReactiveUI.Legacy;
 using ThermoRawMetadataReader;
 
 namespace ThermoRawMetadataPlotting
