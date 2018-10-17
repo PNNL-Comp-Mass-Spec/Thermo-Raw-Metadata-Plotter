@@ -87,6 +87,7 @@ namespace ThermoRawMetadataPlotting
         public ReactiveCommand<Unit, Unit> BrowseForRawFileCommand { get; }
         public ReactiveCommand<Unit, Unit> SwapAxisCommand { get; }
         public ReactiveCommand<Unit, Unit> ZoomFullCommand { get; }
+        public ReactiveCommand<Unit, Unit> ExportDataCommand { get; }
 
         public MainWindowViewModel() : this("")
         {
@@ -102,6 +103,7 @@ namespace ThermoRawMetadataPlotting
             BrowseForRawFileCommand = ReactiveCommand.Create(BrowseForRawFile);
             SwapAxisCommand = ReactiveCommand.Create(SwapAxis);
             ZoomFullCommand = ReactiveCommand.Create(ZoomFull);
+            ExportDataCommand = ReactiveCommand.Create(ExportData);
 
             ScanMetadataProperties = new List<PropertyInfo>(GetProperties());
             XAxisProperty = ScanMetadataProperties.First(x => x.Name.Equals(nameof(ScanMetadata.ScanNumber)));
@@ -119,6 +121,51 @@ namespace ThermoRawMetadataPlotting
             }
 
             this.WhenAnyValue(x => x.XAxisProperty, x => x.YAxisProperty, x => x.SelectedMSLevel).Throttle(TimeSpan.FromMilliseconds(200)).Subscribe(x => ChangePlot());
+        }
+
+        private void ExportData()
+        {
+            if (scanMetadata.Count == 0)
+            {
+                return;
+            }
+
+            // get file save path, default to same directory...
+            var dialog = new CommonSaveFileDialog()
+            {
+                Filters = { new CommonFileDialogFilter("Tab-separated", ".tsv,.txt"), new CommonFileDialogFilter("Comma-separated", ".csv"), },
+                AlwaysAppendDefaultExtension = true,
+                DefaultExtension = ".tsv"
+            };
+
+            if (!string.IsNullOrWhiteSpace(RawFilePath))
+            {
+                var dir = Path.GetDirectoryName(RawFilePath);
+                if (!string.IsNullOrWhiteSpace(dir) && Directory.Exists(dir))
+                {
+                    dialog.InitialDirectory = dir;
+                }
+
+                dialog.DefaultFileName = Path.GetFileNameWithoutExtension(RawFilePath) + ".tsv";
+            }
+
+            var result = dialog.ShowDialog();
+            if (result == CommonFileDialogResult.Ok)
+            {
+                var savePath = dialog.FileName;
+
+                if (!string.IsNullOrWhiteSpace(savePath))
+                {
+                    try
+                    {
+                        ScanMetadataExport.WriteScanMetadata(scanMetadata, savePath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Status = $"Error exporting data: {ex.Message}";
+                    }
+                }
+            }
         }
 
         private void StatusReset(object sender)

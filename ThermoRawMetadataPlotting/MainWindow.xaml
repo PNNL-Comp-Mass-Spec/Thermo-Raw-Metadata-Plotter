@@ -48,17 +48,18 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal">
-            <TextBlock Margin="3" VerticalAlignment="Center" Text="MS Level:" />
-            <ComboBox Margin="3" MinWidth="100" ItemsSource="{Binding MsLevelOptionsList}" SelectedItem="{Binding SelectedMSLevel}">
+        <DockPanel Grid.Row="1" Grid.Column="1" LastChildFill="False">
+            <TextBlock DockPanel.Dock="Left" Margin="3" VerticalAlignment="Center" Text="MS Level:" />
+            <ComboBox DockPanel.Dock="Left" Margin="3" MinWidth="100" ItemsSource="{Binding MsLevelOptionsList}" SelectedItem="{Binding SelectedMSLevel}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource DescConv}}"/>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Margin="3" Content="Zoom Full" Command="{Binding ZoomFullCommand}"></Button>
-        </StackPanel>
+            <Button DockPanel.Dock="Left" Margin="3" Content="Zoom Full" Command="{Binding ZoomFullCommand}" />
+            <Button DockPanel.Dock="Right" Margin="3" Content="Export data" Command="{Binding ExportDataCommand}" />
+        </DockPanel>
         <oxy:PlotView Grid.Row="2" Grid.Column="1" Grid.RowSpan="4" Model="{Binding DataPlot}" />
         <StatusBar Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
             <StatusBarItem Content="{Binding Status}" />
