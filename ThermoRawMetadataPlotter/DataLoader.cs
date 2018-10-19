@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using ThermoRawMetadataReader;
 
-namespace ThermoRawMetadataPlotting
+namespace ThermoRawMetadataPlotter
 {
     public class DataLoader
     {

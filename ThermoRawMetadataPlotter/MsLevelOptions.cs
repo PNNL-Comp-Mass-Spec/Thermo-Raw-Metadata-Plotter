@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace ThermoRawMetadataPlotting
+namespace ThermoRawMetadataPlotter
 {
     public enum MsLevelOptions
     {

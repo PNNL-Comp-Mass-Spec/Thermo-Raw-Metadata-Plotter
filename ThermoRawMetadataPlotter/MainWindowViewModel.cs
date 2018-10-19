@@ -15,7 +15,7 @@ using OxyPlot.Series;
 using ReactiveUI;
 using ThermoRawMetadataReader;
 
-namespace ThermoRawMetadataPlotting
+namespace ThermoRawMetadataPlotter
 {
     public class MainWindowViewModel : ReactiveObject
     {

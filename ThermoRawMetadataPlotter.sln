@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28010.2041
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawMetadataPlotting", "ThermoRawMetadataPlotting\ThermoRawMetadataPlotting.csproj", "{5DDC727E-2606-4054-B61A-AC0B4D8A4090}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawMetadataPlotter", "ThermoRawMetadataPlotter\ThermoRawMetadataPlotter.csproj", "{5DDC727E-2606-4054-B61A-AC0B4D8A4090}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThermoRawMetadataReader", "ThermoRawMetadataReader\ThermoRawMetadataReader.csproj", "{1A5A293B-8872-4986-A995-7B5592C78398}"
 EndProject

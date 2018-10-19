@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Data;
 
-namespace ThermoRawMetadataPlotting
+namespace ThermoRawMetadataPlotter
 {
     public class DescriptionConverter : IValueConverter
     {

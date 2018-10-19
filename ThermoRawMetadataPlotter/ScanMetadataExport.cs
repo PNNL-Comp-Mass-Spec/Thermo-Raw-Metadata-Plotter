@@ -4,7 +4,7 @@ using CsvHelper;
 using CsvHelper.Configuration;
 using ThermoRawMetadataReader;
 
-namespace ThermoRawMetadataPlotting
+namespace ThermoRawMetadataPlotter
 {
     public class ScanMetadataExport
     {
