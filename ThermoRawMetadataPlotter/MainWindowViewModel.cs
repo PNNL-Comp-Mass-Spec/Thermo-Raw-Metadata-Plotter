@@ -267,6 +267,9 @@ namespace ThermoRawMetadataPlotter
             yAxis.AbsoluteMinimum = yMin;
             yAxis.AbsoluteMaximum = yMax;
 
+            // Use reflection to select the data points
+            // This is similar to Func<object, ScatterPoint>(x => ...) in SetupPlot
+
             dataSeries.Mapping = new Func<object, ScatterPoint>(x =>
             {
                 return new ScatterPoint(Convert.ToDouble(xAxisProperty.GetValue(x)), Convert.ToDouble(yAxisProperty.GetValue(x)), value: ((ScanMetadata)x).ScanNumber);
@@ -366,7 +369,7 @@ namespace ThermoRawMetadataPlotter
 
             var color = Colors.DodgerBlue;
             //var color3 = OxyColor.
-            var trackerFormatString = $"Scan: {{{nameof(ScanMetadata.ScanNumber)}}}\nStart time: {{{nameof(ScanMetadata.RetentionTime)}}}\nIon Injection Time (ms): {{{nameof(ScanMetadata.IonInjectionTime)}}}\nBPI: {{{nameof(ScanMetadata.BPI)}}}\nTIC: {{{nameof(ScanMetadata.TIC)}}}\nMS Level: {{{nameof(ScanMetadata.MSLevel)}}}";
+            var trackerFormatString = $"Scan: {{{nameof(ScanMetadata.ScanNumber)}}}\nStart time: {{{nameof(ScanMetadata.RetentionTime)}:F2}}\nIon Injection Time (ms): {{{nameof(ScanMetadata.IonInjectionTime)}:F2}}\nBPI: {{{nameof(ScanMetadata.BPI)}:E2}}\nTIC: {{{nameof(ScanMetadata.TIC)}:E2}}\nMS Level: {{{nameof(ScanMetadata.MSLevel)}}}";
             var pointMapper = new Func<object, ScatterPoint>(x => new ScatterPoint(((ScanMetadata) x).ScanNumber, ((ScanMetadata) x).IonInjectionTime, value: ((ScanMetadata)x).ScanNumber));
 
             dataSeries = new ScatterSeries
