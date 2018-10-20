@@ -7,6 +7,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Media;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using OxyPlot;
@@ -99,8 +100,8 @@ namespace ThermoRawMetadataPlotter
             allMsLevelOptions = new ReactiveList<MsLevelOptions>(Enum.GetValues(typeof(MsLevelOptions)).Cast<MsLevelOptions>().OrderBy(x => (int)x));
             MsLevelOptionsList = allMsLevelOptions;
 
-            OpenRawFileCommand = ReactiveCommand.Create(OpenRawFile);
-            BrowseForRawFileCommand = ReactiveCommand.Create(BrowseForRawFile);
+            OpenRawFileCommand = ReactiveCommand.CreateFromTask(OpenRawFileAsync);
+            BrowseForRawFileCommand = ReactiveCommand.CreateFromTask(BrowseForRawFile);
             SwapAxisCommand = ReactiveCommand.Create(SwapAxis);
             ZoomFullCommand = ReactiveCommand.Create(ZoomFull);
             ExportDataCommand = ReactiveCommand.Create(ExportData);
@@ -121,6 +122,18 @@ namespace ThermoRawMetadataPlotter
             }
 
             this.WhenAnyValue(x => x.XAxisProperty, x => x.YAxisProperty, x => x.SelectedMSLevel).Throttle(TimeSpan.FromMilliseconds(200)).Subscribe(x => ChangePlot());
+        }
+
+        public async void ItemDropped(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                Status = $"\"{path}\" is not a file.";
+                return;
+            }
+
+            RawFilePath = path;
+            await OpenRawFileAsync();
         }
 
         private void ExportData()
@@ -183,7 +196,12 @@ namespace ThermoRawMetadataPlotter
             this.RaisePropertyChanged(nameof(YAxisProperty));
         }
 
-        private void OpenRawFile()
+        public async void OpenRawFile()
+        {
+            await OpenRawFileAsync();
+        }
+
+        private async Task OpenRawFileAsync()
         {
             if (string.IsNullOrWhiteSpace(RawFilePath) || !File.Exists(RawFilePath))
             {
@@ -194,7 +212,7 @@ namespace ThermoRawMetadataPlotter
             try
             {
                 Status = $"Loading data...";
-                scanMetadata = DataLoader.GetMetadata(RawFilePath);
+                scanMetadata = await Task.Run(() => DataLoader.GetMetadata(RawFilePath));
                 Status = $"Data loaded.";
             }
             catch (Exception e)
@@ -215,7 +233,7 @@ namespace ThermoRawMetadataPlotter
             ChangePlot();
         }
 
-        private void BrowseForRawFile()
+        private async Task BrowseForRawFile()
         {
             var dialog = new CommonOpenFileDialog
             {
@@ -238,7 +256,7 @@ namespace ThermoRawMetadataPlotter
 
                 if (!string.IsNullOrWhiteSpace(RawFilePath))
                 {
-                    OpenRawFile();
+                    await OpenRawFileAsync();
                 }
             }
         }

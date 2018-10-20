@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:ThermoRawMetadataPlotter"
         xmlns:oxy="http://oxyplot.org/wpf"
         mc:Ignorable="d"
+        AllowDrop="True" DragOver="Main_OnDragOver" Drop="Main_OnDrop"
         d:DataContext="{d:DesignInstance {x:Type local:MainWindowViewModel}, IsDesignTimeCreatable=True}"
         Title="Scan Info" Height="600" Width="1024">
     <Window.Resources>
