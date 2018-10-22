@@ -393,7 +393,7 @@ namespace ThermoRawMetadataPlotter
             dataSeries = new ScatterSeries
             {
                 MarkerType = MarkerType.Circle,
-                MarkerSize = 8,
+                MarkerSize = 2,
                 MarkerFill = OxyColor.FromAColor(64, OxyColors.DodgerBlue),
                 ColorAxisKey = "ColorAxis",
                 TrackerFormatString = trackerFormatString,
