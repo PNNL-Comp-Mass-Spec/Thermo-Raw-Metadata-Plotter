@@ -270,6 +270,8 @@ namespace ThermoRawMetadataPlotter
         {
             xAxis.Title = descConverter.Convert(xAxisProperty);
             yAxis.Title = descConverter.Convert(yAxisProperty);
+            var xAxisFunc = ScanMetadata.GetValueRetrieverFunction(xAxisProperty);
+            var yAxisFunc = ScanMetadata.GetValueRetrieverFunction(yAxisProperty);
             dataSeries.ItemsSource = scanMetadata.Where(x => SelectedMSLevel == MsLevelOptions.All || SelectedMSLevel == MsLevelOptions.MSn && x.MSLevel > 1 || x.MSLevel == (int)SelectedMSLevel);
 
             var data = scanMetadata.Where(x =>
@@ -277,8 +279,8 @@ namespace ThermoRawMetadataPlotter
                     x.MSLevel == (int) SelectedMSLevel)
                 .ToList();
 
-            GetMinMax(data, x => Convert.ToDouble(xAxisProperty.GetValue(x)), out var xMin, out var xMax);
-            GetMinMax(data, x => Convert.ToDouble(yAxisProperty.GetValue(x)), out var yMin, out var yMax);
+            GetMinMax(data, xAxisFunc, out var xMin, out var xMax);
+            GetMinMax(data, yAxisFunc, out var yMin, out var yMax);
 
             xAxis.AbsoluteMinimum = xMin;
             xAxis.AbsoluteMaximum = xMax;
@@ -288,10 +290,7 @@ namespace ThermoRawMetadataPlotter
             // Use reflection to select the data points
             // This is similar to Func<object, ScatterPoint>(x => ...) in SetupPlot
 
-            dataSeries.Mapping = new Func<object, ScatterPoint>(x =>
-            {
-                return new ScatterPoint(Convert.ToDouble(xAxisProperty.GetValue(x)), Convert.ToDouble(yAxisProperty.GetValue(x)), value: ((ScanMetadata)x).ScanNumber);
-            });
+            dataSeries.Mapping = new Func<object, ScatterPoint>(x => new ScatterPoint(xAxisFunc((ScanMetadata)x), yAxisFunc((ScanMetadata)x), value: ((ScanMetadata)x).ScanNumber));
 
             DataPlot.ResetAllAxes();
             DataPlot.InvalidatePlot(true);
@@ -315,11 +314,10 @@ namespace ThermoRawMetadataPlotter
             colorAxis.Maximum = max;
 
             colorAxis.Palette.Colors.Clear();
-            ////for (int i = 0; i < 256; i++)
-            //for (int i = 120; i < 136; i++)
-            //{
-            //    colorAxis.Palette.Colors.Add(OxyColor.FromAColor((byte)i, OxyColors.DodgerBlue));
-            //}
+
+            // Since OxyPlot merges dots that have the exact same color, but overlays them instead if they differ in the slightest bit,
+            // use a color axis on the value (set to Scan Number) with an alpha (opacity) range from 98 to 158, which will be generally indistinguishable to the eye.
+            // cycle it so that there will never be 2 consecutive scans with the same color alpha value
             for (var i = 0; i < max + 1; i++)
             {
                 colorAxis.Palette.Colors.Add(OxyColor.FromAColor((byte)(i % 60 + 98), OxyColors.DodgerBlue));
