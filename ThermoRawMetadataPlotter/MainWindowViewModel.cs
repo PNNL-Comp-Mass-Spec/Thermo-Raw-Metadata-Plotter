@@ -8,7 +8,6 @@ using System.Reactive.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -89,10 +88,6 @@ namespace ThermoRawMetadataPlotter
         public ReactiveCommand<Unit, Unit> SwapAxisCommand { get; }
         public ReactiveCommand<Unit, Unit> ZoomFullCommand { get; }
         public ReactiveCommand<Unit, Unit> ExportDataCommand { get; }
-
-        public MainWindowViewModel() : this("")
-        {
-        }
 
         public MainWindowViewModel(string rawFilePath)
         {
@@ -211,9 +206,9 @@ namespace ThermoRawMetadataPlotter
 
             try
             {
-                Status = $"Loading data...";
+                Status = "Loading data...";
                 scanMetadata = await Task.Run(() => DataLoader.GetMetadata(RawFilePath));
-                Status = $"Data loaded.";
+                Status = "Data loaded.";
             }
             catch (Exception e)
             {
@@ -324,7 +319,7 @@ namespace ThermoRawMetadataPlotter
             }
         }
 
-        private void GetMinMax(List<ScanMetadata> data, Func<ScanMetadata, double> selector, out double min, out double max)
+        private void GetMinMax(IReadOnlyCollection<ScanMetadata> data, Func<ScanMetadata, double> selector, out double min, out double max)
         {
             if (data.Count == 0)
             {
@@ -373,8 +368,7 @@ namespace ThermoRawMetadataPlotter
             };
 
             colorAxis.Palette.Colors.Clear();
-            //for (int i = 0; i < 256; i++)
-            for (int i = 120; i < 136; i++)
+            for (var i = 120; i < 136; i++)
             {
                 colorAxis.Palette.Colors.Add(OxyColor.FromAColor((byte)i, OxyColors.DodgerBlue));
             }
@@ -383,8 +377,6 @@ namespace ThermoRawMetadataPlotter
             DataPlot.Axes.Add(xAxis);
             DataPlot.Axes.Add(colorAxis);
 
-            var color = Colors.DodgerBlue;
-            //var color3 = OxyColor.
             var trackerFormatString = $"Scan: {{{nameof(ScanMetadata.ScanNumber)}}}\nStart time: {{{nameof(ScanMetadata.RetentionTime)}:F2}}\nIon Injection Time (ms): {{{nameof(ScanMetadata.IonInjectionTime)}:F2}}\nBPI: {{{nameof(ScanMetadata.BPI)}:E2}}\nTIC: {{{nameof(ScanMetadata.TIC)}:E2}}\nMS Level: {{{nameof(ScanMetadata.MSLevel)}}}";
             var pointMapper = new Func<object, ScatterPoint>(x => new ScatterPoint(((ScanMetadata) x).ScanNumber, ((ScanMetadata) x).IonInjectionTime, value: ((ScanMetadata)x).ScanNumber));
 

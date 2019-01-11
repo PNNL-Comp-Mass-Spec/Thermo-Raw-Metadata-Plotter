@@ -22,7 +22,7 @@ namespace ThermoRawMetadataPlotter
         }
     }
 
-    public class ScanMetadataMap : ClassMap<ScanMetadata>
+    public sealed class ScanMetadataMap : ClassMap<ScanMetadata>
     {
         public ScanMetadataMap()
         {
@@ -32,6 +32,7 @@ namespace ThermoRawMetadataPlotter
             Map(x => x.RetentionTime).Name("Retention Time").Index(index++);
             Map(x => x.IonInjectionTime).Name("Ion Injection Time (ms)").Index(index++);
             Map(x => x.BPI).Name("BPI").Index(index++);
+            // ReSharper disable once RedundantAssignment
             Map(x => x.TIC).Name("TIC").Index(index++);
         }
     }

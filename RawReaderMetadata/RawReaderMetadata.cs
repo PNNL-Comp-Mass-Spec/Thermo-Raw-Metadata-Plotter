@@ -11,7 +11,7 @@ namespace RawReaderMetadata
     public class RawReaderMetadata : IMetadataReader
     {
         public string RawFilePath { get; }
-        private IRawFileThreadManager rawReaderThreader = null;
+        private IRawFileThreadManager rawReaderThreader;
 
         public RawReaderMetadata(string rawFilePath)
         {
@@ -27,7 +27,7 @@ namespace RawReaderMetadata
             {
                 if (!rawReader.SelectMsData())
                 {
-                    // dataset has no MS data. Return.
+                    // Dataset has no MS data. Return.
                     return data;
                 }
 
@@ -40,8 +40,8 @@ namespace RawReaderMetadata
 
                 for (var i = minScan; i <= maxScan; i++)
                 {
-                    var scan = new ScanMetadata();
-                    scan.ScanNumber = i;
+                    var scan = new ScanMetadata {ScanNumber = i};
+
                     //scan.RetentionTime = rawReader.RetentionTimeFromScanNumber(i);
 
                     var scanStats = rawReader.GetScanStatsForScanNumber(i);

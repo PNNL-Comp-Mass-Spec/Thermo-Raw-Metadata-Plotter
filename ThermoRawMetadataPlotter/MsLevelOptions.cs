@@ -10,6 +10,8 @@ namespace ThermoRawMetadataPlotter
         [Description("All MSn")]
         MSn = 0,
 
+        // ReSharper disable UnusedMember.Global
+
         [Description("MS1")]
         MS1 = 1,
 
@@ -39,5 +41,7 @@ namespace ThermoRawMetadataPlotter
 
         [Description("MS10")]
         MS10 = 10,
+
+        // ReSharper restore UnusedMember.Global
     }
 }

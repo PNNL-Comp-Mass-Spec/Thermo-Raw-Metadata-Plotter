@@ -9,7 +9,7 @@ namespace MSFileReaderMetadata
     public class MSFileReaderMetadata : IMetadataReader
     {
         public string RawFilePath { get; }
-        private XRawFileIO rawFile = null;
+        private XRawFileIO rawFile;
 
         public MSFileReaderMetadata(string rawFilePath)
         {
@@ -44,14 +44,18 @@ namespace MSFileReaderMetadata
                     continue;
                 }
 
-                var scan = new ScanMetadata();
-                scan.ScanNumber = i;
-                scan.RetentionTime = info.RetentionTime;
-                scan.TIC = info.TotalIonCurrent;
-                scan.BPI = info.BasePeakIntensity;
-                scan.MSLevel = info.MSLevel;
+                var ionInjectionTime = double.Parse(info.ScanEvents.FirstOrDefault(x => x.Key.StartsWith("Ion Injection Time", StringComparison.OrdinalIgnoreCase)).Value ?? "0");
 
-                scan.IonInjectionTime = double.Parse(info.ScanEvents.FirstOrDefault(x => x.Key.StartsWith("Ion Injection Time", StringComparison.OrdinalIgnoreCase)).Value ?? "0");
+                var scan = new ScanMetadata
+                {
+                    ScanNumber = i,
+                    RetentionTime = info.RetentionTime,
+                    TIC = info.TotalIonCurrent,
+                    BPI = info.BasePeakIntensity,
+                    MSLevel = info.MSLevel,
+                    IonInjectionTime = ionInjectionTime
+                };
+
 
                 data.Add(scan);
             }

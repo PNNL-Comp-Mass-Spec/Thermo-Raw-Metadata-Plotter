@@ -1,14 +1,20 @@
-﻿<Window x:Class="ThermoRawMetadataPlotter.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:ThermoRawMetadataPlotter"
-        xmlns:oxy="http://oxyplot.org/wpf"
-        mc:Ignorable="d"
-        AllowDrop="True" DragOver="Main_OnDragOver" Drop="Main_OnDrop"
-        d:DataContext="{d:DesignInstance {x:Type local:MainWindowViewModel}, IsDesignTimeCreatable=True}"
-        Title="Scan Info" Height="600" Width="1024">
+﻿<Window
+    x:Class="ThermoRawMetadataPlotter.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:ThermoRawMetadataPlotter"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:oxy="http://oxyplot.org/wpf"
+    Title="Thermo Raw Metadata Plotter"
+    Width="1024"
+    Height="600"
+    d:DataContext="{d:DesignInstance {x:Type local:MainWindowViewModel},
+                                     IsDesignTimeCreatable=True}"
+    AllowDrop="True"
+    DragOver="Main_OnDragOver"
+    Drop="Main_OnDrop"
+    mc:Ignorable="d">
     <Window.Resources>
         <local:DescriptionConverter x:Key="DescConv" />
     </Window.Resources>
@@ -26,43 +32,106 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <DockPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2">
-            <TextBlock DockPanel.Dock="Left" Margin="3" VerticalAlignment="Center" Text="Raw file:" />
-            <Button DockPanel.Dock="Right" Margin="3" Content="Open" Command="{Binding OpenRawFileCommand}" />
-            <Button DockPanel.Dock="Right" Margin="3" Content="Browse" Command="{Binding BrowseForRawFileCommand}" />
+        <DockPanel
+            Grid.Row="0"
+            Grid.Column="0"
+            Grid.ColumnSpan="2">
+            <TextBlock
+                Margin="3"
+                VerticalAlignment="Center"
+                DockPanel.Dock="Left"
+                Text="Raw file:" />
+            <Button
+                Margin="3"
+                Command="{Binding OpenRawFileCommand}"
+                Content="Open"
+                DockPanel.Dock="Right" />
+            <Button
+                Margin="3"
+                Command="{Binding BrowseForRawFileCommand}"
+                Content="Browse"
+                DockPanel.Dock="Right" />
             <TextBox Margin="3" Text="{Binding RawFilePath}" />
         </DockPanel>
-        <TextBlock Grid.Row="1" Grid.Column="0" Margin="3" Text="Y-Axis:" />
-        <ListBox Grid.Row="2" Grid.Column="0" ItemsSource="{Binding ScanMetadataProperties}" SelectedItem="{Binding YAxisProperty}">
+        <TextBlock
+            Grid.Row="1"
+            Grid.Column="0"
+            Margin="3"
+            Text="Y-Axis:" />
+        <ListBox
+            Grid.Row="2"
+            Grid.Column="0"
+            ItemsSource="{Binding ScanMetadataProperties}"
+            SelectedItem="{Binding YAxisProperty}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Converter={StaticResource DescConv}}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <Button Grid.Row="3" Grid.Column="0" Margin="3" Content="Swap Axis" Command="{Binding SwapAxisCommand}" />
-        <TextBlock Grid.Row="4" Grid.Column="0" Margin="3" Text="X-Axis:" />
-        <ListBox Grid.Row="5" Grid.Column="0" ItemsSource="{Binding ScanMetadataProperties}" SelectedItem="{Binding XAxisProperty}">
+        <Button
+            Grid.Row="3"
+            Grid.Column="0"
+            Margin="3"
+            Command="{Binding SwapAxisCommand}"
+            Content="Swap Axis" />
+        <TextBlock
+            Grid.Row="4"
+            Grid.Column="0"
+            Margin="3"
+            Text="X-Axis:" />
+        <ListBox
+            Grid.Row="5"
+            Grid.Column="0"
+            ItemsSource="{Binding ScanMetadataProperties}"
+            SelectedItem="{Binding XAxisProperty}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Converter={StaticResource DescConv}}" />
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
-        <DockPanel Grid.Row="1" Grid.Column="1" LastChildFill="False">
-            <TextBlock DockPanel.Dock="Left" Margin="3" VerticalAlignment="Center" Text="MS Level:" />
-            <ComboBox DockPanel.Dock="Left" Margin="3" MinWidth="100" ItemsSource="{Binding MsLevelOptionsList}" SelectedItem="{Binding SelectedMSLevel}">
+        <DockPanel
+            Grid.Row="1"
+            Grid.Column="1"
+            LastChildFill="False">
+            <TextBlock
+                Margin="3"
+                VerticalAlignment="Center"
+                DockPanel.Dock="Left"
+                Text="MS Level:" />
+            <ComboBox
+                MinWidth="100"
+                Margin="3"
+                DockPanel.Dock="Left"
+                ItemsSource="{Binding MsLevelOptionsList}"
+                SelectedItem="{Binding SelectedMSLevel}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Converter={StaticResource DescConv}}"/>
+                        <TextBlock Text="{Binding Converter={StaticResource DescConv}}" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button DockPanel.Dock="Left" Margin="3" Content="Zoom Full" Command="{Binding ZoomFullCommand}" />
-            <Button DockPanel.Dock="Right" Margin="3" Content="Export data" Command="{Binding ExportDataCommand}" />
+            <Button
+                Margin="3"
+                Command="{Binding ZoomFullCommand}"
+                Content="Zoom Full"
+                DockPanel.Dock="Left" />
+            <Button
+                Margin="3"
+                Command="{Binding ExportDataCommand}"
+                Content="Export data"
+                DockPanel.Dock="Right" />
         </DockPanel>
-        <oxy:PlotView Grid.Row="2" Grid.Column="1" Grid.RowSpan="4" Model="{Binding DataPlot}" />
-        <StatusBar Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="2">
+        <oxy:PlotView
+            Grid.Row="2"
+            Grid.RowSpan="4"
+            Grid.Column="1"
+            Model="{Binding DataPlot}" />
+        <StatusBar
+            Grid.Row="6"
+            Grid.Column="0"
+            Grid.ColumnSpan="2">
             <StatusBarItem Content="{Binding Status}" />
         </StatusBar>
     </Grid>

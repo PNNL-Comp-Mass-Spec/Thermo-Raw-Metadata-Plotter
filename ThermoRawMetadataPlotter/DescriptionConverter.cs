@@ -30,20 +30,20 @@ namespace ThermoRawMetadataPlotter
                 flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
             }
 
-            DescriptionAttribute desc = null;
+            DescriptionAttribute desc;
             if (value is PropertyInfo pi)
             {
                 desc = pi.GetCustomAttributes(inherit).OfType<DescriptionAttribute>().FirstOrDefault();
             }
             else
             {
-                var attrib = value.GetType().GetField(value.ToString(), flags)?.GetCustomAttributes(inherit);
-                desc = attrib?.OfType<DescriptionAttribute>().FirstOrDefault();
+                var attribute = value.GetType().GetField(value.ToString(), flags)?.GetCustomAttributes(inherit);
+                desc = attribute?.OfType<DescriptionAttribute>().FirstOrDefault();
 
                 if (desc == null)
                 {
-                    attrib = value.GetType().GetProperty(value.ToString(), flags)?.GetCustomAttributes(inherit);
-                    desc = attrib?.OfType<DescriptionAttribute>().FirstOrDefault();
+                    attribute = value.GetType().GetProperty(value.ToString(), flags)?.GetCustomAttributes(inherit);
+                    desc = attribute?.OfType<DescriptionAttribute>().FirstOrDefault();
                 }
             }
 
